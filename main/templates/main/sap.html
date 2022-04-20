@@ -1,0 +1,55 @@
+{% extends "main/load.html" %}
+
+{% block file %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card-box table-responsive">
+            <form name="load" action="/sap/" method="post"
+                  id="file_selection_form">
+                {% csrf_token %}
+                <span>
+                    Please choose a SAP extract to upload:
+                    {{ sap_file_form.file }}
+                    <button class= "btn btn-primary" type = submit>
+                        <span>Select</span>
+                    </button>
+                </span>
+            </form>
+        </div>
+    </div>
+</div>
+    <div class="row">
+    <div class="col-sm-12">
+        <div class="card-box table-responsive">
+            <table class="table table dataTable" id="sap_upload">
+                <thead>
+                <tr>
+                    <th>Uploaded SAP files:</th>
+                </tr>
+                </thead>
+                <tbody>
+                 {% for file in sap %}
+                <tr>
+                    <td>
+                    {{ file.file_name }}
+                    </td>
+                    <td align="right">
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_sap" value="{{ file.file_name }}">
+                            <button type="submit" class="btn
+                            btn-primary" onclick="return confirm
+                            ('Are you sure you want to delete all the data ' +
+                             'for this file')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

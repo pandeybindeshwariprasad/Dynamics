@@ -1,0 +1,272 @@
+{% extends "main/contents.html" %}
+{% load main_extras %}
+
+{% block file %}
+{% endblock %}
+{% block page_body %}
+<div class="container">
+    <div class="row">
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="row">
+            {% if result_form %}
+                {% block result_input %}
+                    <div class="card-box table-responsive" id="result_input">
+                        <form action="" method="get" id="search_select_form">
+                            {{ search_selector }}
+                            <input type="hidden" name="selected_drp" id="selected_drp"/>
+                        </form>
+                        <form action="\stored_search\" method="post"
+                              id="submit_form">
+                            {% csrf_token %}
+                            <div class="row">
+                                <table class="table table-striped table-bordered" id="results">
+                                <caption>
+                                    <input type="hidden" name="completed_search" value="{{ model_search.description }}">
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        {% for field in result_form %}
+                                        <td>
+                                                <b>{{ field.label }}</b>
+                                        </td>
+                                        {% endfor %}
+                                        <td>
+                                                <b>Flag as uncertain</b>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        {% for field in result_form %}
+                                            <td>
+                                                    {{ field }}
+                                            </td>
+                                        {% endfor %}
+                                        <td>
+                                            <form method="POST" action="">
+                                            {% csrf_token %}
+                                                <input type="checkbox" name="uncertainty_flag" value="Yes">
+                                            </form>
+                                        </td>
+                                </tbody>
+                                </table>
+                            </div>
+                            <script>
+                                function submit_check() {
+                                    page = document.getElementById("page_no");
+                                    last_page = {{last_page}}
+                                    //Check for page value
+                                    if(parseInt(page.value) == 0 || parseInt(page.value) > last_page){
+                                        alert("Page "+page.value+ " does not exist!");
+                                        return false
+                                    }
+                                    // Check for result value
+                                    const result = document.getElementById("id_result");
+                                    if( result.value ){
+                                    return true
+                                    } else{
+                                       return confirm('Are you sure you want to' +
+                                     ' submit this without a result?');
+                                    }
+
+                                }
+                            </script>
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <b>Submit:</b>
+                                    <button class="btn btn-primary" type="submit"
+                                            onclick="return submit_check()">
+                                        <span class="glyphicon glyphicon-floppy-open"></span>
+                                    </button>
+                                    <script>
+                                        function autofillClick() {
+                                            const result = document.getElementById("id_result");
+                                            result.value= 'TBC'
+                                        }
+                                    </script>
+                                    <b>Skip:</b>
+                                    <button class="btn btn-primary" type="submit"
+                                            onclick="autofillClick();">
+                                            <span class="glyphicon glyphicon-chevron-right"></span>
+                                    </button>
+                                </div>
+                                <div class="col-sm-4" align="right" id="id_div">
+                                    Page:
+                                    {% if page_not_found %}
+                                        <input type="text" name="page_of_result"
+                                           value="{{page_not_found.page_number }}"
+                                           style="width: 40px" align="right" id="page_no">
+                                    {% else %}
+                                    <input type="text" name="page_of_result"
+                                           value="{{page_to_view.page_number }}"
+                                           style="width: 40px" align="right" id="page_no">
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                {% endblock %}
+            {% else %}
+                {% block search_select %}
+                    <div class="card-box table-responsive" id="result_input">
+                        <form action="" method="get" id="search_select_form">
+                            {{ search_selector }}
+                            <input type="hidden" name="selected_drp" id="selected_drp"/>
+                        </form>
+                    </div>
+                {% endblock %}
+            {% endif %}
+            </div>
+            <div class="row">
+                {% block hit_table %}
+                <div class="card-box table-responsive">
+                    <table class="table table-striped table-bordered" id="ResultTable">
+                    <thead>
+                        <tr>
+                            <td>
+                                Page Number
+                            </td>
+                            <td>
+                                Score
+                            </td>
+                            <td>
+                                Section Match
+                            </td>
+                            <td>
+                                Page-Name Match
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for page in results %}
+                        <tr>
+                            <td>
+                                <form method="get" id="page_selector"
+                                      action="">
+                                    {% if hidden_sections %}
+                                    <input type="hidden" name="sections" value="{{ hidden_sections }}">
+                                    {% endif %}
+                                    <input type="hidden" name="page_selected"
+                                           value="{{ page.page_number }}">
+                                    <input type="hidden" name="model_search_id" value="{{ model_search.description }}">
+                                    <span>
+                                        <button class="btn btn-primary" type="submit">
+                                            {{page.page_number}}
+                                        </button>
+                                    </span>
+                                </form>
+                            </td>
+                            <td>
+                                {{ page.score|floatformat:2 }}
+                            </td>
+                            <td>
+                                {% if page.section_hits %}
+                                    <i class="fa fa-check-circle-o fa-lg" style="color: #86BC25"></i>
+                                {% else %}
+                                    <i class="fa fa-times-circle-o fa-lg" style="color: #DA291C"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if page.name_hits %}
+                                    <i class="fa fa-check-circle-o fa-lg" style="color: #86BC25"></i>
+                                {% else %}
+                                    <i class="fa fa-times-circle-o fa-lg" style="color: #DA291C"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="row" style="height: 900px">
+                {% block page_display %}
+                <div class="card-box table-responsive" style="height: 50%">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>{{ model_file.project_name }}</h4>
+                        </div>
+                    </div>
+                    <div class="row" style="height: 90%">
+                        <!--<iframe type="application/pdf" src="{{ page_to_view.model.link }}" style="width:100%;height:100%;" id="pdf"></iframe>-->
+                        {%if page_not_found %}
+                            <iframe type="application/pdf" src="{{ page_not_found.link }}" style="width:100%;height:100%;" id="pdf"></iframe>
+                        {% else %}
+                            <iframe type="application/pdf" src="{{ page_to_view.model.link }}" style="width:100%;height:100%;" id="pdf"></iframe>
+                        {% endif %}
+
+                    </div>
+                </div>
+                <div class="card-box table-responsive" style="height: 50%">
+                    <div id="page_text">
+                        {%if page_not_found %}
+                            <!--<p>{{ page_not_found.page_txt }}</p>-->
+                            {%if page_not_found.page_txt == 'False'%}
+                                <p>No Keywords found on this page!</p>
+                            {% else %}
+                                {% for line in  page_not_found.page_txt %}
+                                    <p>{{ line }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        {% else %}
+                            {% for line in  page_text %}
+                                <p>{{ line }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endblock %}
+                <script>
+                    function highlight_number(colour, pattern) {
+                        const expression = new RegExp(pattern, 'ig');
+                        // hate to say it but JS > Python
+                        const text = document.getElementById("page_text");
+                        text.innerHTML = text.innerHTML.replace(expression,
+                            `<mark style="background-color: ${colour}">`
+                            + "$1"
+                            + `</mark>`);
+                    }
+
+                    function highlight_word(colour, pattern)  {
+                        const expression = new RegExp('(?<!\\w)' + pattern, 'ig');
+                        // hate to say it but JS > Python
+                        const text = document.getElementById("page_text");
+                        text.innerHTML = text.innerHTML.replace(expression,
+                            `<mark style="background-color: ${colour}">`
+                            + "$1"
+                            +`</mark>`);
+                    }
+
+                    highlight_number("#D0D0CE", "(\\d+)");
+                    const colour_scheme = ["#86BC25", "#C4D600", "#2C5234", "#0076A8", "#012169"];
+                    let colour_counter = 0;
+                    {% for keyword_group in keywords %}
+                        {% for keyword in keyword_group %}
+                            highlight_word(colour_scheme[colour_counter], "({{ keyword }})");
+                        {% endfor %}
+                        colour_counter++;
+                        if (colour_counter > 5) {
+                            colour_counter = 0
+                        }
+                    {% endfor %}
+                </script>
+                <script>
+                    {% if search_failed %}
+                        var search = "{{ search_failed }}";
+                        var str = new String("Demo Text");
+                        alert(`The search for {{ search_failed|safe }} failed. There are no pages that match those keywords`);
+                        //document.getElementById('id_search').value ="Total value of Accounts Receivable from customers";
+
+                    {% endif %}
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

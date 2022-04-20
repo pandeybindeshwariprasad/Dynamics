@@ -1,0 +1,135 @@
+{% extends "shared/index.html" %}
+{#{% load getattribute %}#}
+
+{% block css_includes_additional %}
+{% endblock css_includes_additional %}
+
+
+
+{% block file %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card-box table-responsive">
+            <form name="load" action="/contents/" method="get"
+                  id="file_selection_form">
+
+                <p>
+                <span>
+                    Select Source Country
+                    {{ country_form }}
+                </span>
+                </p>
+                <p>
+                <span>
+                    Please choose a file to scan:
+                    {{ file_form }}
+
+                    <script>
+                    function reset_checker() {
+                        var check = document.getElementById('id_check');
+                        if (check.checked) {
+                            return(confirm('Are you sure you want to remove all the ' +
+                                'stored ' +
+                                'data for this file?'))
+                        }
+                    }
+
+
+                    </script>
+                    </span>
+                    <br>
+                    <br>
+                    <span>
+                    <button class= "btn btn-primary" type = submit
+                            onclick="return(reset_checker())">
+                        <span>Select</span>
+                    </button>
+                </span>
+                </p>
+                <p>
+                <span>
+                    What type of file is this?
+                    {{ search_file_form }}
+                </span>
+                </p>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_body %}
+
+<!-- # ------------- New Changes------------------------ # -->
+<div class="card-box table-responsive">
+                    <table class="table table dataTable" id="sap_upload">
+                        <thead>
+                            <tr>
+                            <th>Export Results to CSV</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td>Export Progress Summary</td>
+                            <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="summary_export"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                            </form>
+                            </td>
+                            </tr>
+                            <tr>
+                            <td>Export Full Breakdown</td>
+                            <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="full_export"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                            <tr>
+                                <td>Export Full Breakdown with SAP Data</td>
+                                <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="full_export_with_sap"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                                </form>
+                                </td>
+                            </tr>
+                         <tr>
+                                <td>Export All Reports Data</td>
+                                <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="all_reports_export"
+                                    value="TRUE">
+                                 <input type="text" value="Cost,IT,Separation"
+                                        data-role="tagsinput", name="keyword_tags">
+
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                                </form>
+                                </td>
+                            </tr>
+                </tbody>
+            </table>
+        </div>
+<!-- # ------------- Changes End------------------------ # -->
+
+{% endblock %}
+
+

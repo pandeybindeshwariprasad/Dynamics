@@ -1,0 +1,359 @@
+{% extends "main/load.html" %}
+
+{% block file %}
+{% endblock %}
+{% load staticfiles %}
+<div class="container">
+    <div class="row">
+        {% block breadcrumb %}
+
+        {% include "main/header.html" %}
+
+        {% endblock %}
+        {% block page_body %}
+        <div class="col-sm-12">
+            <div class="card-box table-responsive">
+                <div>
+                    <table width="100%">
+                        <tr>
+                            <th><h1>{{ file.project_name }}</h1>
+                                <br> <!-- Trigger/Open The Modal -->
+                                <button id="myBtn">Preview File</button>
+                            </th>
+                            <th>
+                                <h4 align="right">Company Description</h4>
+
+                                <div class="box" id = "cd_box" align="right">
+                                    <table width="100%"><tr>
+                                        <th>
+                                            <label class="cancel" id = "cd_cancel" onclick="cancel(this)" org_val="">X</label>
+                                        </th>
+                                        <th class="c1">
+                                            <span class="edit" id = "cd_edit" onclick="edit(this)">edit</span>
+                                            <span class="save" id = "cd_save" onclick="save(this)">save</span>
+                                        </th>
+                                    </tr></table>
+
+                                  <span class="text" id='cd_txt'>{{cmp_description}}</span>
+                                </div>
+                            </th>
+                            <th>
+                                <h4 align="right">Source Member Firm/Country</h4>
+
+                                <div class="mf_box" align="right">
+                                    <table width="100%"><tr>
+                                        <th>
+                                            <label class="cancel" id="mf_cancel" onclick="firm_cancel(this)" org_val="">X</label>
+                                        </th>
+                                        <th class="c1">
+                                            <span class="edit" id="mf_edit" onclick="firm_edit(this)">edit</span>
+                                            <span class="save" id="mf_save" onclick="firm_save(this)">save</span>
+                                        </th>
+                                    </tr></table>
+                                    <span class="text" id='member_firm_txt'>{{member_firm}}</span>
+                                    <select id="member_firm" hidden="True">
+                                         <option value="">Select Member Firm</option>
+                                        {% for mf in all_member_firm %}
+                                        <option value="{{mf.Alpha_3_code}}">{{mf.Country}}-{{mf.Alpha_3_code}}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                </div>
+                            </th>
+
+<!-- The Modal -->
+<div id="previewModal" class="modal_preview">
+
+  <!-- Modal content -->
+  <div class="modal_preview-content">
+    <div class="modal_preview-header">
+      <span class="close">&times;</span>
+        <h4><b>{{ file.project_name }}</b></h4>
+    </div>
+    <div class="modal_preview-body">
+      <div class="row" style="height: 550px">
+                {% block page_display %}
+                <div class="card-box table-responsive" style="height:98%;padding:10px">
+                    <div class="row" style="height: 100%">
+                        <iframe type="application/pdf" src="\static\{{ file_path }}#zoom=60%" style="width:100%;height:100%;" id="pdf" >
+                        </iframe>
+                    </div>
+                </div>
+
+                {% endblock %}
+                <script>
+                    function highlight_number(colour, pattern) {
+                        try{
+                        const expression = new RegExp(pattern, 'ig');
+                        // hate to say it but JS > Python
+                        const text = document.getElementById("page_text");
+                        text.innerHTML = text.innerHTML.replace(expression,
+                            `<mark style="background-color: ${colour}">`
+                            + "$1"
+                            + `</mark>`);
+                         }
+                        catch(err){
+                            console.log(err.message);
+                        }
+                    }
+
+                    function highlight_word(colour, pattern)  {
+                        const expression = new RegExp('(?<!\\w)' + pattern, 'ig');
+                        // hate to say it but JS > Python
+                        const text = document.getElementById("page_text");
+                        text.innerHTML = text.innerHTML.replace(expression,
+                            `<mark style="background-color: ${colour}">`
+                            + "$1"
+                            +`</mark>`);
+                    }
+
+                    highlight_number("#D0D0CE", "(\\d+)");
+                    const colour_scheme = ["#86BC25", "#C4D600", "#2C5234", "#0076A8", "#012169"];
+                    let colour_counter = 0;
+                    {% for keyword_group in keywords %}
+                        {% for keyword in keyword_group %}
+                            highlight_word(colour_scheme[colour_counter], "({{ keyword }})");
+                        {% endfor %}
+                        colour_counter++;
+                        if (colour_counter > 5) {
+                            colour_counter = 0
+                        }
+                    {% endfor %}
+                </script>
+                <script>
+                    {% if search_failed %}
+                        var search = "{{ search_failed }}";
+                        alert(`The search for {{ search_failed|safe }} failed. There are no pages that match those keywords`);
+                        //document.getElementById('id_search').value ="Total value of Accounts Receivable from customers";
+                    {% endif %}
+                </script>
+            </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Get the modal
+var modal_preview = document.getElementById('previewModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+btn.onclick = function() {
+  modal_preview.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal_preview.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal_preview) {
+    modal_preview.style.display = "none";
+  }
+}
+
+</script>
+
+<script type = "text/JavaScript">
+
+ function edit(){
+      cmp_description = $('#cd_text').html()
+
+      $('#cd_edit').hide();
+      $('#cd_box').addClass('editable');
+      $('#cd_txt').attr('contenteditable', 'true');
+      $('#cd_save').css("display", "block");
+      $('#cd_cancel').css("display", "block");
+      $('#cd_cancel').attr('org_val', cmp_description);
+ };
+ function firm_edit(){
+      mf_txt = $('#member_firm_txt').html()
+      $('#member_firm_txt').hide();
+      $('#mf_edit').hide();
+      $('.mf_box').addClass('mf_editable');
+      $('#member_firm').css("display", "block");
+      $('#mf_save').css("display", "block");
+      $('#mf_cancel').css("display", "block");
+      $('#mf_cancel').attr('org_val', mf_txt);
+      // Initialize select2
+      $("#member_firm").select2();
+      // For search added in hidden filed
+      try{
+              // For search added in hidden filed
+              var e = document.getElementById("id_search");
+              var select_val = e.options[e.selectedIndex].value;  //selected_drp
+              document.getElementById("selected_drp").value = select_val
+              $(".select2").select2();
+            }
+      catch(err){
+        console.log(err.message);
+            }
+ };
+
+function cancel(){
+    org_val = $('.cancel').attr('org_val');
+    $('#cd_save').hide();
+    $('#cd_cancel').hide();
+    $('#cd_box').removeClass('editable');
+    $('#cd_txt').html(org_val)
+    $('#cd_txt').removeAttr('contenteditable');
+    $('#cd_edit').show();
+ };
+ function firm_cancel(){
+    org_val = $('#mf_cancel').attr('org_val');
+    $('#mf_save').hide();
+    $('#member_firm').hide();
+    $('#mf_cancel').hide();
+    $('.mf_box').removeClass('mf_editable');
+    $('#member_firm_txt').html(org_val)
+    $('#member_firm_txt').show();
+    $('#member_firm_txt').removeAttr('contenteditable');
+    $('#mf_edit').show();
+ };
+
+function save(){
+   cmp_description = $('#cd_txt').html()
+   console.log("cmp_description: " + cmp_description)
+   //call to edit_cmp_description view
+   $.ajax({
+            url: '/edit_cmp_description',
+            data: {
+              'cmp_description': cmp_description
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.is_edited) {
+                alert("Company description updated successfully!");
+                $('#cd_save').hide();
+                $('#cd_cancel').hide();
+                $('#cd_box').removeClass('editable');
+                $('#cd_txt').removeAttr('contenteditable');
+                $('#cd_edit').show();
+              }
+              else{
+                alert("Unable to update company description!")
+              }
+            }
+   });
+};
+
+function firm_save(){
+   member_firm_country_text = $('#member_firm_txt').html()
+   member_firm_country = $("#member_firm option:selected" ).val();
+   member_firm_country_text = $("#member_firm option:selected" ).text();
+   console.log("member_firm_country_text: " + member_firm_country_text)
+   console.log("member_firm_country: " + member_firm_country)
+   //call to edit_member_firm_country_text view
+   $.ajax({
+            url: '/edit_member_firm_country',
+            data: {
+              'member_firm_country': member_firm_country,
+              'member_firm_country_text': member_firm_country_text
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.is_edited) {
+                alert("Member Firm/Country updated successfully!");
+                $('#mf_save').hide();
+                $('#mf_cancel').hide();
+                $('#member_firm').hide();
+                $('#member_firm_txt').show();
+                $('.mf_box').removeClass('mf_editable');
+                $('#member_firm_txt').removeAttr('contenteditable');
+                $('#member_firm_txt').html(data.member_firm_country)
+                $('#mf_edit').show();
+                $('.select2 ').hide();
+              }
+              else{
+                alert("Unable to update Member Firm/Country!")
+              }
+            }
+   });
+};
+</script>
+                            </th>
+                        </tr>
+                    </table>
+
+                </div>
+
+            <br>
+                <div>
+                    Search specific sections:
+                </div>
+                <div>
+                    <table class="table dataTable" id="Contents">
+                        <thead>
+                            <tr>
+                                <th>Section</th>
+                                <th>First Page</th>
+                                <th>Last Page</th>
+                                <th>Sub-sections</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        {% for section, sub_sections in section_zip %}
+                        <tbody>
+                            <tr>
+                                <td> {{ section.name }} </td>
+                                <td> {{ section.first_page}} </td>
+                                <td> {{ section.last_page }} </td>
+                                <td>
+                                    {% if sub_sections %}
+                                    <select title="sub_section">
+                                    {% for sub_section in sub_sections %}
+                                        <option>{{ sub_section }}</option>
+                                    {% endfor %}
+                                    </select>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <input type ="checkbox" name= "sections" value = "{{section.id}}" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    {% endfor %}
+                    </table>
+                </div>
+
+
+                <script>
+                    function section_selector() {
+                        const checkboxes = document.getElementsByName("sections");
+                        let checked_boxes = [];
+                        for (let i=0; i<checkboxes.length; i++) {
+                            if (checkboxes[i].checked) {
+                                checked_boxes.push(checkboxes[i].value);
+                            }
+                        }
+                        const page_div = document.createElement('div');
+                        page_div.innerHTML = `<input type="hidden" name="sections" id="sections" value=${checked_boxes}>`;
+                        document.getElementById("dynamic_input").appendChild(page_div);
+                    }
+
+                </script>
+
+                <script>
+                    {% if search_failed %}
+                        var search = "{{ search_failed }}";
+                        alert(`The search for {{ search_failed|safe }} failed. There are no pages that match those keywords`);
+                    {% endif %}
+                </script>
+
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+</div>
+
+
+

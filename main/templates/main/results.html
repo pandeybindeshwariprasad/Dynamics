@@ -1,0 +1,257 @@
+{% extends "main/contents.html" %}
+{% block tables %}
+{% endblock %}
+{% block page_body %}
+
+
+<script>
+    function filter_sub_types() {
+
+        const type = document.getElementById("search_type");
+
+        const valid_sub_types = [];
+        {% for type, sub_type_list in types.items %}
+            var js_type = "{{ type }}".replace(/&amp;/g, '&');
+            var temp_array = [];
+            {% for sub_type in sub_type_list %}
+                var js_sub_type = "{{ sub_type }}".replace(/&amp;/g, '&');
+                temp_array.push(js_sub_type);
+            {% endfor %}
+            if (type.value === js_type || type.value === "all"){
+                valid_sub_types.push(...temp_array);
+            }
+        {% endfor %}
+
+        var sub_type_selector = document.getElementById("sub_type");
+        var i;
+
+        for (i = sub_type_selector.options.length - 1; i >= 1; i--) {
+            sub_type_selector.options.remove(i);
+        }
+
+        for (let i = 0; i < valid_sub_types.length; i++) {
+            var new_option = document.createElement("option");
+            new_option.value = valid_sub_types[i];
+            new_option.label = valid_sub_types[i];
+            sub_type_selector.add(new_option);
+        }
+    }
+
+    function filter_results(){
+
+        const table = document.getElementById("results");
+        const tr = table.getElementsByTagName("tr");
+        const type = document.getElementById("search_type");
+        const sub_type = document.getElementById("sub_type");
+
+        for (let i=1; i<tr.length; i++) {
+            let type_cell_value = tr[i].getElementsByTagName("td")[1].innerHTML.toLowerCase().replace(/&amp;/g, '&');
+            let sub_type_cell_value = tr[i].getElementsByTagName("td")[2].innerHTML.toLowerCase().replace(/&amp;/g, '&');
+
+            if (type_cell_value === type.value.toLowerCase() || type.value.toLowerCase() === "all") {
+                if (sub_type_cell_value === sub_type.value.toLowerCase() || sub_type.value.toLowerCase() === "all") {
+                    tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+            } else {
+                tr[i].style.display = "none";
+            }
+
+        }
+    }
+
+    function getCheckedBoxes(){
+        var checkboxes = document.getElementById('y');
+        var newcheckboxes = checkboxes.cloneNode();
+        var form = document.getElementById('deleted_form');
+        form.appendChild(newcheckboxes);
+    }
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="card-box table-responsive" align="center">
+            <div class="col-sm-12">
+                <table class="table table dataTable">
+                    <thead>
+                        {% for title in progress_summary.keys %}
+                            <th>
+                                {{ title }}
+                            </th>
+                        {% endfor %}
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for rate in progress_summary.values %}
+                                <td>
+                                    {{ rate }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            <div class="card-box table-responsive">
+                <div class="row" align="center">
+                     <h1 align="left">
+                        {{ file.project_name }}
+                    </h1>
+                </div>
+                <table class="table table dataTable" id="results">
+                    <caption>
+                    <div class="col-sm-6">
+                        <select title="type" id="search_type" onchange="filter_sub_types(); filter_results();">
+                        <option value="all" label="Type" selected></option>
+                            {% for type in types.keys %}
+                                <option value="{{ type }}" label="{{ type }}"></option>
+                            {% endfor %}
+                        </select>
+                        <select title="sub_type" id="sub_type" onchange="filter_results()">
+                        <option value="all" label="Sub-type" selected></option>
+                            {% for sub_type_list in types.values %}
+                                {% for sub_type in sub_type_list %}
+                                    <option value="{{ sub_type }}" label="{{ sub_type }}"></option>
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-6" align="right">
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_all"
+                                   value="TRUE">
+                            <button type="submit" class="btn
+                            btn-primary" onclick="return confirm
+                            ('Are you sure you want to delete all ' +
+                             'results in this file?')">
+                                Clear All
+                            </button>
+                        </form>
+                    </div>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Sub-Type</th>
+                            <th>Result</th>
+                            <th>Units</th>
+                            <th>Date</th>
+                            <th>Page</th>
+                            <th>Notes</th>
+                            <th>Last edited on</th>
+                            <th>Flagged as uncertain</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                            <!-- BROKEN DELETE BUTTON-->
+                            <!--<th align="left">
+                                <form id="deleted_form" method="POST" action="">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary" onclick="getCheckedBoxes('y');
+                                    return confirm
+                                    ('Are you sure you want to delete the selected ' +
+                                     'results in this file?')">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                    <input type="hidden" value=TRUE name="delete_selected">
+                                </form>
+                            </th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.search }}</td>
+                            <td>{{ result.search.search_type }}</td>
+                            <td>{{ result.search.sub_type }}</td>
+                            <td>{{ result.result }}</td>
+                            <td>{{ result.unit }}</td>
+                            <td>{{ result.timestamp }}</td>
+                            <td>{{ result.page }}</td>
+                            <td>{{ result.notes }}</td>
+                            <td>{{ result.submitted_on|date:"d/m/y"}} at {{ result.submitted_on|time:"H:i" }}</td>
+                            <td>{{ result.uncertainty_flag }}</td>
+                            <td style="width: 10%; text-align: left">
+                                <form action="/stored_search/" method="get">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">
+                                        Edit
+                                    </button>
+                                    <input type="hidden" value="{{ result.id }}" name="result_id">
+                                    <input type="hidden" value="{{ result.page }}" name="page">
+                                    <input type="hidden" value="{{ model_search }}" name="completed_search">
+                                </form>
+                            </td>
+                            <td>
+                                <form id="deleted_form" method="POST" action="">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary" onclick="
+                                    return confirm
+                                    ('Are you sure you want to delete the selected ' +
+                                     'result in this file?')">
+                                        <span>Delete</span>
+                                    </button>
+                                    <input type="hidden" value=TRUE name="delete">
+                                    <input type="hidden" value="{{ result.id }}" name="result_id">
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+                <div class="card-box table-responsive">
+                    <table class="table table dataTable" id="sap_upload">
+                        <thead>
+                            <tr>
+                            <th>Export Results to CSV</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td>Export Progress Summary</td>
+                            <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="summary_export"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                            </form>
+                            </td>
+                            </tr>
+                            <tr>
+                            <td>Export Full Breakdown</td>
+                            <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="full_export"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                            <tr>
+                                <td>Export Full Breakdown with SAP Data</td>
+                                <td align="right">
+                                <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="full_export_with_sap"
+                                    value="TRUE">
+                                <button type="submit" class="btn btn-default">
+                                Export to CSV
+                                </button>
+                                </form>
+                                </td>
+                            </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

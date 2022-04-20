@@ -1,0 +1,40 @@
+{% block stored_searches %}
+<div class="col-sm-3">
+    <form name = "stored_search" action="/stored_search/"
+          method="get" id="auto_search">
+        <span>Start Auto-Searching:</span>
+        <button class="btn btn-default" type="submit" onclick="section_selector()">
+            <span class="glyphicon glyphicon-th-list"></span>
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block keyword_searches %}
+<div class="col-sm-6" align="center">
+    <form id = "keyword_search" action="/report/" method="get"
+          onsubmit="section_selector();">
+        <span>Search for keywords: </span>
+        {{ keyword_form }}
+        <button class="btn btn-default" type="submit">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+        <div id="dynamic_input">
+        </div>
+        <span>Search outside of Auto-Searching: </span>
+        <input name="free_search" id="free_search" type="checkbox" />
+    </form>
+</div>
+{% endblock %}
+
+{% block review %}
+<div class="col-sm-3">
+    <form name="review" action="/results" method="get"
+          id="review_form">
+        <span>Review submitted results: </span>
+        <button class="btn btn-default" type="submit">
+            <span class="glyphicon glyphicon-list-alt"></span>
+        </button>
+    </form>
+</div>
+{% endblock %}

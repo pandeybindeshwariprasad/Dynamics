@@ -1,0 +1,48 @@
+{% extends "shared/index.html" %}
+
+{#{% load getattribute %}#}
+
+{% block css_includes_additional %}
+{% endblock css_includes_additional %}
+
+{% block page_body %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card-box table-responsive">
+                {% if next %}
+                <p>You are logged out, please log in again</p>
+                {% endif %}
+                <div>
+                    {% if form.errors %}
+                    <p>Your username and password didn't match. Please try again.</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <form method="post" action="{% url 'login' %}" class= "login-form" autocomplete="off">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class= "btn btn-default" type="submit" value="login">
+                            Login
+                        </button>
+                        <input type="hidden" name="next" value="{{ next }}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  $('.login-form').disableAutoFill();
+  $('.login-form').on('submit', function() {
+  debugger;
+    $('[name="username"]').val($('[name="username"]').val());
+    $('[name="username"]').val('');
+    $('[name="password"]').val($('[name="password"]').val());
+    $('[name="password"]').val('');
+  });
+</script>
+{% endblock %}
+
+

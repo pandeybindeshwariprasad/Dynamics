@@ -1,0 +1,4 @@
+.idea/
+*__pycache__/
+dynamics_log
+dynamics_log.txt

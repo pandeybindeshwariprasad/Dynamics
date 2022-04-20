@@ -1,0 +1,89 @@
+{% load staticfiles %}
+{% include 'shared/css_includes.html' %}
+<!DOCTYPE html>
+<html>
+    <body>
+    <!-- ========== Left Sidebar Start ========== -->
+
+        <div class="left side-menu" style="width:150px">
+            <div class="sidebar-inner slimscrollleft">
+                <!--- Divider -->
+                {% block leftmenu %}
+                <div id="sidebar-menu">
+                    <ul>
+                        <li class="text-muted menu-title">Settings</li>
+                        {% block alt_keywords %}
+                        <li>
+                            <a id="sidebar-alts" href="/alt_keys" class="waves-effect">
+                                <i class="ti-upload"></i>
+                                <span>Keywords</span>
+                            </a>
+                        </li>
+                        {% endblock %}
+                        {% block sap_link %}
+                        <li>
+                            <a id="sap-upload" href="/sap" class="waveseffect">
+                                <i class="ti-reload"></i>
+                                <span>Load SAP</span>
+                            </a>
+                        </li>
+                        {% endblock %}
+                        <li class="text-muted menu-title">Process</li>
+
+                        {% block leftmenu_home %}
+                        <li>
+                            <a id="sidebar-load" href="/" class="waves-effect">
+                                <i class="ti-home"></i>
+                                <span>1) Load</span>
+                            </a>
+                        </li>
+                        {% endblock leftmenu_home %}
+                        {% block contents_link %}
+                        <li>
+                            <a id="sidebar-scan" href="/contents" class="waves-effect">
+                                <i class="ti-book"></i>
+                                <span>2) Scan</span>
+                            </a>
+                        </li>
+                        {% endblock %}
+                        {% block result_link %}
+                        <li>
+                            <a id="sidebar-review" href="/results" class="waves-effect">
+                                <i class="ti-list"></i>
+                                <span>3) Review</span>
+                            </a>
+                        </li>
+                        {% endblock %}
+                        <li class="text-muted menu-title">Account</li>
+                        {% block password_change %}
+                        <li>
+                            <a href="{% url 'password_change' %}" class="waves-effect">
+                                <i class="glyphicon glyphicon-lock"></i>
+                                <span>Password</span>
+							</a>
+                        </li>
+                        {% endblock %}
+                        {% block logout %}
+                        <li>
+                            <a href="{% url 'logout' %}" class="waves-effect">
+                                <i class="glyphicon glyphicon-chevron-left"></i>
+                                <span>Logout </span></a>
+                        </li>
+                        {% endblock %}
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                {% endblock leftmenu %}
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <!-- Left Sidebar End -->
+
+    </body>
+</html>
+
+<script>
+    {#alert("sidebar-{{ page }}");#}
+    const contentsLabel = document.getElementById("sidebar-{{ page }}");
+    contentsLabel.className += " active";
+</script>
